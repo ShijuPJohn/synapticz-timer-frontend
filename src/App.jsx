@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Play, CheckCircle2, XCircle, Clock, Trash2, RotateCcw, PlusCircle, PartyPopper, Coffee, AlertCircle, Pause, Trophy, Rocket, Zap } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Play, CheckCircle2, XCircle, Clock, Trash2, RotateCcw, PlusCircle, PartyPopper, Coffee, AlertCircle, Pause, Trophy, Rocket, Zap, GripVertical } from 'lucide-react';
+import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { motivatingLines } from './motivatingLines';
 
@@ -34,59 +34,50 @@ function Modal({ isOpen, onClose, title, message, onConfirm, type = 'alert', con
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
         <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 40, rotate: isAhead ? -2 : 0 }}
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ 
             opacity: 1, 
             scale: 1, 
             y: 0, 
-            rotate: 0,
-            transition: { type: 'spring', damping: 15, stiffness: 200 }
+            transition: { type: 'spring', damping: 20, stiffness: 300 }
           }}
-          exit={{ opacity: 0, scale: 0.8, y: 40 }}
-          className={`bg-white rounded-[4rem] shadow-[0_32px_128px_rgba(0,0,0,0.2)] w-full max-w-2xl overflow-hidden border-4 ${
-            isAhead ? 'border-emerald-400' : 'border-slate-100'
-          } relative`}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className={`bg-white shadow-[0_32px_128px_rgba(0,0,0,0.3)] w-full max-w-2xl overflow-hidden relative ${
+            isAhead ? 'bg-emerald-50' : ''
+          }`}
         >
           {isAhead && (
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <motion.div 
                 animate={{ 
-                  scale: [1, 1.2, 1],
-                  opacity: [0.1, 0.2, 0.1],
+                  scale: [1, 1.1, 1],
+                  opacity: [0.05, 0.1, 0.05],
                 }}
                 transition={{ duration: 4, repeat: Infinity }}
                 className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-400 rounded-full blur-3xl"
-              />
-              <motion.div 
-                animate={{ 
-                  scale: [1, 1.3, 1],
-                  opacity: [0.1, 0.3, 0.1],
-                }}
-                transition={{ duration: 5, repeat: Infinity, delay: 1 }}
-                className="absolute -bottom-24 -left-24 w-80 h-80 bg-indigo-400 rounded-full blur-3xl"
               />
             </div>
           )}
 
           <div className="p-12 sm:p-20 text-center relative z-10">
             <motion.div 
-              initial={{ scale: 0.5, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.2, type: 'spring' }}
-              className={`w-32 h-32 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 shadow-2xl ${
-              type === 'alert' ? 'bg-amber-100 text-amber-600 shadow-amber-100' : 
-              type === 'success' ? (isAhead ? 'bg-emerald-500 text-white shadow-emerald-200' : 'bg-emerald-100 text-emerald-600 shadow-emerald-100') :
-              'bg-indigo-600 text-white shadow-indigo-200'
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className={`w-24 h-24 flex items-center justify-center mx-auto mb-10 ${
+              type === 'alert' ? 'bg-amber-100 text-amber-700' : 
+              type === 'success' ? (isAhead ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700') :
+              'bg-indigo-600 text-white'
             }`}>
-              {type === 'success' ? (isAhead ? <Rocket size={64} /> : <Trophy size={64} />) : <AlertCircle size={64} />}
+              {type === 'success' ? (isAhead ? <Rocket size={48} /> : <Trophy size={48} />) : <AlertCircle size={48} />}
             </motion.div>
             
             <motion.h3 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className={`text-5xl sm:text-6xl font-black mb-6 tracking-tighter ${
-                isAhead ? 'text-emerald-600' : 'text-slate-800'
+              transition={{ delay: 0.2 }}
+              className={`text-4xl sm:text-5xl font-black mb-6 tracking-tighter uppercase ${
+                isAhead ? 'text-emerald-800' : 'text-slate-900'
               }`}
             >
               {title}
@@ -95,52 +86,45 @@ function Modal({ isOpen, onClose, title, message, onConfirm, type = 'alert', con
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.3 }}
               className="space-y-6 mb-16"
             >
-              <p className="text-slate-500 font-bold text-2xl leading-tight italic">
-                "{message}"
+              <p className="text-slate-700 font-bold text-xl sm:text-2xl leading-tight">
+                {message}
               </p>
               {subMessage && (
-                <p className="text-slate-400 font-medium text-lg">
+                <p className="text-slate-600 font-medium text-lg">
                   {subMessage}
                 </p>
               )}
             </motion.div>
             
-            <div className="flex gap-6">
+            <div className="flex gap-4">
               {type === 'confirm' && (
                 <button
                   onClick={onClose}
-                  className="flex-1 py-7 bg-slate-100 text-slate-500 rounded-[2rem] font-black text-xl hover:bg-slate-200 transition-all active:scale-95"
+                  className="flex-1 py-6 bg-slate-200 text-slate-800 font-black text-lg hover:bg-slate-300 transition-all active:scale-95 uppercase tracking-widest"
                 >
                   CANCEL
                 </button>
               )}
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ y: -2 }}
+                whileTap={{ y: 0 }}
                 onClick={() => {
                   if (onConfirm) onConfirm();
                   onClose();
                 }}
-                className={`flex-1 py-7 text-white rounded-[2rem] font-black text-2xl shadow-2xl transition-all relative overflow-hidden group ${
-                  type === 'confirm' ? 'bg-indigo-600 shadow-indigo-200 hover:bg-indigo-700' : 
-                  type === 'success' ? 'bg-emerald-600 shadow-emerald-200 hover:bg-emerald-700' :
-                  'bg-amber-500 shadow-amber-200 hover:bg-amber-600'
+                className={`flex-1 py-6 text-white font-black text-xl transition-all relative overflow-hidden group uppercase tracking-widest shadow-xl ${
+                  type === 'confirm' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200' : 
+                  type === 'success' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200' :
+                  'bg-amber-600 hover:bg-amber-700 shadow-amber-200'
                 }`}
               >
                 <span className="relative z-10 flex items-center justify-center gap-3">
-                  {isAhead && <Zap size={24} fill="currentColor" />}
+                  {isAhead && <Zap size={20} fill="currentColor" />}
                   {confirmText}
                 </span>
-                {isAhead && (
-                  <motion.div 
-                    animate={{ x: ['-100%', '200%'] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-                  />
-                )}
               </motion.button>
             </div>
           </div>
@@ -462,43 +446,43 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-roboto transition-colors duration-500 pb-20">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-[1400px] mx-auto px-8 py-6 flex justify-between items-center">
+      <header className="bg-white border-b border-slate-300 sticky top-0 z-30 shadow-sm">
+        <div className="max-w-[1400px] mx-auto px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-4">
           <a href="/" className="flex items-center gap-4 hover:opacity-90 transition-opacity group">
-            <div className="w-20 h-20 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-200 group-hover:scale-105 transition-transform">
+            <div className="w-18 h-18 p-2 bg-indigo-600 flex items-center justify-center text-white shadow-xl shadow-indigo-100 group-hover:scale-105 transition-transform">
               <Clock size={40} />
             </div>
             <div className="flex flex-col">
-              <h1 className="text-4xl font-black tracking-tight text-slate-800 leading-none">SYNAPTICZ TIMER</h1>
-              <span className="text-xl font-black text-indigo-500 uppercase tracking-[.9rem] mt-1">Focus & Flow</span>
+              <h1 className="text-4xl font-black tracking-tight text-slate-900 leading-none">SYNAPTICZ TIMER</h1>
+              <span className="text-lg font-black text-indigo-600 uppercase tracking-[0.98rem] mt-1">Focus & Flow</span>
             </div>
           </a>
 
-          <div className="flex items-center gap-16">
-            <div className="hidden lg:flex items-center gap-12">
-              <div className="flex gap-2 items-center justify-center">
-                <span className="text-[1.5rem] font-black text-slate-400 uppercase tracking-widest mb-1">Total Plan: </span>
-                <span className="text-5xl font-mono font-bold text-teal-700">{Math.floor(totalPlanTime / 60)}<span className="text-3xl ml-0.5">m</span></span>
+          <div className="flex flex-col sm:flex-row items-center gap-8 md:gap-16 w-full md:w-auto">
+            <div className="flex items-center gap-8 md:gap-12 justify-center md:justify-end w-full md:w-auto">
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Total Plan</span>
+                <span className="text-4xl font-mono font-black text-teal-600">{Math.floor(totalPlanTime / 60)}<span className="text-base ml-0.5">m</span></span>
               </div>
               {(mode === 'executing' || mode === 'waiting') && (
                 <>
-                  <div className="flex flex-col items-end border-l-2 border-slate-100 pl-12">
-                    <span className="text-[10px] font-black  uppercase tracking-widest mb-1 text-indigo-500">Elapsed</span>
-                    <span className="text-3xl font-mono font-black text-indigo-600">{formatTime(elapsedPlanTime)}</span>
+                  <div className="flex items-center gap-3 border-l-2 border-slate-200 pl-8 md:pl-12">
+                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest text-indigo-600">Elapsed</span>
+                    <span className="text-3xl font-mono font-black text-indigo-700">{formatTime(elapsedPlanTime)}</span>
                   </div>
-                  <div className="flex flex-col items-end border-l-2 border-slate-100 pl-12">
-                    <span className="text-[10px] font-black  uppercase tracking-widest mb-1 text-rose-500">Remaining</span>
-                    <span className="text-3xl font-mono font-black text-rose-600">{formatTime(remainingPlanTime)}</span>
+                  <div className="flex items-center gap-3 border-l-2 border-slate-200 pl-8 md:pl-12">
+                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest text-rose-600">Remaining</span>
+                    <span className="text-3xl font-mono font-black text-rose-700">{formatTime(remainingPlanTime)}</span>
                   </div>
                 </>
               )}
             </div>
 
-            <div className="text-right border-l-2 border-slate-100 pl-12">
-              <p className="text-4xl font-mono font-black text-slate-800 tracking-tighter">
+            <div className="text-center md:text-right border-t-2 md:border-t-0 md:border-l-2 border-slate-200 pt-6 md:pt-0 md:pl-12 w-full md:w-auto">
+              <p className="text-4xl font-mono font-black text-slate-900 tracking-tighter">
                 {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
               </p>
-              <p className="text-xs text-slate-400 font-black uppercase tracking-widest mt-1">
+              <p className="text-xs text-slate-600 font-black uppercase tracking-widest mt-1">
                 {currentTime.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
               </p>
             </div>
@@ -506,7 +490,7 @@ function App() {
         </div>
 
         {/* Global Progress Bar */}
-        <div className="h-2 w-full bg-slate-100 overflow-hidden">
+        <div className="h-1.5 w-full bg-slate-100 overflow-hidden">
           <motion.div 
             className="h-full bg-indigo-600"
             initial={{ width: 0 }}
@@ -521,41 +505,41 @@ function App() {
           {mode === 'summary' ? (
             <motion.div
               key="summary"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               className="text-center py-12"
             >
-              <div className="bg-white p-12 rounded-[3rem] shadow-2xl shadow-indigo-100 border border-slate-100 inline-block w-full">
-                <div className="w-24 h-24 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-8">
+              <div className="bg-white p-12 shadow-[0_30px_80px_rgba(0,0,0,0.2)] inline-block w-full">
+                <div className="w-24 h-24 bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-8">
                   <PartyPopper size={48} />
                 </div>
-                <h2 className="text-4xl font-black text-slate-800 mb-2">Plan Complete!</h2>
-                <p className="text-slate-500 font-medium mb-12">Here's how you did on your focus session.</p>
+                <h2 className="text-4xl font-black text-slate-900 mb-2 uppercase tracking-tight">Plan Complete!</h2>
+                <p className="text-slate-700 font-medium mb-12">Here's how you did on your focus session.</p>
 
-                <div className="space-y-4 text-left mb-12">
+                <div className="space-y-2 text-left mb-12">
                   {tasks.map(task => (
-                    <div key={task.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                      <div className="flex items-center gap-3">
+                    <div key={task.id} className="flex items-center justify-between p-6 bg-slate-100">
+                      <div className="flex items-center gap-4">
                         {task.status === 'completed' ? (
-                          <CheckCircle2 className="text-emerald-500" size={24} />
+                          <CheckCircle2 className="text-emerald-600" size={24} />
                         ) : task.status === 'failed' ? (
-                          <XCircle className="text-rose-500" size={24} />
+                          <XCircle className="text-rose-600" size={24} />
                         ) : (
-                          <Clock className="text-slate-300" size={24} />
+                          <Clock className="text-slate-500" size={24} />
                         )}
                         <div className="flex flex-col">
-                          <span className="font-bold text-slate-700">{task.name || (task.type === 'break' ? 'Short Break' : 'Untitled Task')}</span>
-                          <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">{task.type}</span>
+                          <span className="font-bold text-slate-800 text-lg">{task.name || (task.type === 'break' ? 'Short Break' : 'Untitled Task')}</span>
+                          <span className="text-[10px] uppercase font-black tracking-widest text-slate-600">{task.type}</span>
                         </div>
                       </div>
-                      <span className="text-slate-400 font-bold">{task.duration}m</span>
+                      <span className="text-slate-600 font-black">{task.duration}m</span>
                     </div>
                   ))}
                 </div>
 
                 <button
                   onClick={() => setMode('planning')}
-                  className="w-full py-6 bg-indigo-600 text-white rounded-2xl font-black text-xl shadow-xl shadow-indigo-200 hover:bg-indigo-700 transition-all flex items-center justify-center gap-3"
+                  className="w-full py-6 bg-indigo-600 text-white font-black text-xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 uppercase tracking-widest"
                 >
                   <RotateCcw size={24} />
                   START NEW PLAN
@@ -567,10 +551,10 @@ function App() {
               {/* Context Header */}
               <div className="flex justify-between items-end mb-4">
                 <div>
-                  <h2 className="text-4xl font-black text-slate-800 tracking-tight">
+                  <h2 className="text-4xl font-black text-slate-900 tracking-tight uppercase">
                     {mode === 'planning' ? 'Focus Plan' : mode === 'waiting' ? 'Scheduled' : 'Live Focus'}
                   </h2>
-                  <p className="text-slate-500 mt-2 font-medium">
+                  <p className="text-slate-700 mt-2 font-medium">
                     {mode === 'planning' ? 'Define your flow. Scroll on time to adjust.' : 
                      mode === 'waiting' ? 'Waiting for the scheduled start time...' : 
                      `Currently focusing on: ${tasks[activeIndex]?.name}`}
@@ -579,7 +563,7 @@ function App() {
                 {mode === 'planning' && (
                   <button
                     onClick={resetAll}
-                    className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                    className="p-2 text-slate-600 hover:text-red-600 transition-colors"
                     title="Reset All"
                   >
                     <RotateCcw size={20} />
@@ -590,21 +574,21 @@ function App() {
               {/* Waiting Hero */}
               {mode === 'waiting' && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100 text-center"
+                  className="bg-white p-12 shadow-[0_20px_60px_rgba(0,0,0,0.15)] text-center"
                 >
-                  <div className="text-sm text-indigo-500 font-black tracking-widest uppercase mb-2">Starts At</div>
-                  <div className="text-5xl font-mono font-black text-indigo-600 mb-6">
+                  <div className="text-sm text-indigo-600 font-black tracking-widest uppercase mb-2">Starts At</div>
+                  <div className="text-6xl font-mono font-black text-indigo-700 mb-8">
                     {targetStartTime?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
                   </div>
-                  <div className="text-slate-400 font-bold mb-8">
+                  <div className="text-slate-600 font-bold mb-10 text-xl">
                     {Math.max(0, Math.floor((targetStartTime - currentTime) / 1000))}s remaining
                   </div>
                   <div className="flex gap-4">
                     <button
                       onClick={() => { setMode('planning'); setTargetStartTime(null); }}
-                      className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-xl font-bold hover:bg-slate-200 transition-all"
+                      className="flex-1 py-5 bg-slate-200 text-slate-700 font-bold hover:bg-slate-300 transition-all uppercase tracking-widest"
                     >
                       Cancel & Edit
                     </button>
@@ -620,7 +604,7 @@ function App() {
                         setMode('executing');
                         setTargetStartTime(null);
                       }}
-                      className="flex-1 py-4 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+                      className="flex-1 py-5 bg-indigo-600 text-white font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
                     >
                       <Play size={20} fill="currentColor" />
                       START NOW
@@ -632,60 +616,53 @@ function App() {
               {/* Execution Hero (Active Timer) */}
               {mode === 'executing' && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white p-8 rounded-[3rem] shadow-2xl shadow-indigo-100 border border-slate-100 relative overflow-hidden"
+                  className="bg-white p-10 shadow-[0_30px_70px_rgba(0,0,0,0.2)] relative overflow-hidden"
                 >
                   <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-100">
                     <motion.div 
-                      className="h-full bg-indigo-500"
+                      className="h-full bg-indigo-600"
                       initial={{ width: 0 }}
                       animate={{ width: `${((activeIndex + 1) / tasks.length) * 100}%` }}
                     />
                   </div>
                   
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-10">
                     <div className="text-center md:text-left flex-1">
-                       <p className="text-indigo-500 font-black tracking-widest uppercase mb-1 text-xs">
+                       <p className="text-indigo-600 font-black tracking-widest uppercase mb-2 text-xs">
                          {tasks[activeIndex].type === 'break' ? 'Break Time' : `Task ${activeIndex + 1} of ${tasks.length}`}
                        </p>
-                       <h3 className="text-3xl font-black text-slate-800 tracking-tight leading-tight">{tasks[activeIndex].name}</h3>
+                       <h3 className="text-4xl font-black text-slate-900 tracking-tight leading-none uppercase">{tasks[activeIndex].name}</h3>
                     </div>
 
-                    <div className="flex flex-col items-center min-w-[240px]">
-                      <div className={`text-7xl font-mono font-black tabular-nums leading-none ${timeLeft < 60 ? 'text-rose-600' : 'text-slate-800'}`}>
+                    <div className="flex flex-col items-center min-w-[280px]">
+                      <div className={`text-8xl font-mono font-black tabular-nums leading-none ${timeLeft < 60 ? 'text-rose-700' : 'text-slate-900'}`}>
                         {formatTime(timeLeft)}
                       </div>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-2">
                       <button
                         onClick={() => setIsPaused(!isPaused)}
-                        className={`p-5 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center ${isPaused ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-100 text-slate-600 shadow-sm'}`}
+                        className={`p-6 transition-all active:scale-95 flex items-center justify-center shadow-xl ${isPaused ? 'bg-indigo-700 text-white shadow-indigo-200' : 'bg-slate-100 text-slate-700'}`}
                         title={isPaused ? 'Resume' : 'Pause'}
                       >
-                        {isPaused ? <Play size={28} fill="currentColor" /> : <Pause size={28} fill="currentColor" />}
+                        {isPaused ? <Play size={32} fill="currentColor" /> : <Pause size={32} fill="currentColor" />}
                       </button>
                       <button
                         onClick={() => handleTaskAction('completed')}
-                        className="p-5 bg-emerald-500 text-white rounded-2xl shadow-lg shadow-emerald-200 hover:bg-emerald-600 active:scale-95 transition-all"
+                        className="p-6 bg-emerald-500 text-white shadow-xl shadow-emerald-100 hover:bg-emerald-600 active:scale-95 transition-all"
                         title="Complete"
                       >
-                        <CheckCircle2 size={28} />
+                        <CheckCircle2 size={32} />
                       </button>
                       <button
                         onClick={() => handleTaskAction('failed')}
-                        className="p-5 bg-rose-500 text-white rounded-2xl shadow-lg shadow-rose-200 hover:bg-rose-600 active:scale-95 transition-all"
+                        className="p-6 bg-rose-500 text-white shadow-xl shadow-rose-100 hover:bg-rose-600 active:scale-95 transition-all"
                         title="Failed"
                       >
-                        <XCircle size={28} />
-                      </button>
-                      <button
-                        onClick={addMoreTime}
-                        className="p-5 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 active:scale-95 transition-all"
-                        title="Add 1 min"
-                      >
-                        <PlusCircle size={28} />
+                        <XCircle size={32} />
                       </button>
                     </div>
                   </div>
@@ -693,7 +670,12 @@ function App() {
               )}
 
               {/* Task List */}
-              <div className="space-y-4">
+              <Reorder.Group 
+                axis="y" 
+                values={tasks} 
+                onReorder={setTasks}
+                className="space-y-4"
+              >
                 {tasks.map((task, index) => (
                   <TaskRow 
                     key={task.id} 
@@ -706,33 +688,33 @@ function App() {
                     onRemove={() => removeTask(task.id)}
                   />
                 ))}
-              </div>
+              </Reorder.Group>
 
               {/* Planning Controls */}
               {(mode === 'planning' || (mode === 'executing' && isPaused)) && (
-                <div className="flex flex-col gap-4 mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex flex-col gap-4 mt-8">
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       onClick={addTask}
-                      className="group flex items-center justify-center gap-2 py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 hover:border-indigo-400 hover:text-indigo-500 transition-all active:scale-95 bg-white/50"
+                      className="group flex items-center justify-center gap-3 py-6 bg-white text-slate-600 hover:text-indigo-700 transition-all active:scale-98 shadow-[0_4px_12px_rgba(0,0,0,0.1)] uppercase tracking-widest font-black"
                     >
                       <Plus size={24} className="group-hover:rotate-90 transition-transform" />
-                      <span className="font-bold">{mode === 'planning' ? 'Add Task + Break' : 'Add Task + Break'}</span>
+                      <span>{mode === 'planning' ? 'Add Task' : 'Add Task'}</span>
                     </button>
                     <button
                       onClick={addBreak}
-                      className="group flex items-center justify-center gap-2 py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 hover:border-amber-400 hover:text-amber-600 transition-all active:scale-95 bg-white/50"
+                      className="group flex items-center justify-center gap-3 py-6 bg-white text-slate-600 hover:text-amber-700 transition-all active:scale-98 shadow-[0_4px_12px_rgba(0,0,0,0.1)] uppercase tracking-widest font-black"
                     >
                       <Coffee size={24} className="group-hover:scale-110 transition-transform" />
-                      <span className="font-bold">Add Break</span>
+                      <span>Add Break</span>
                     </button>
                   </div>
 
                   {mode === 'planning' && (
-                    <div className="bg-white p-6 rounded-3xl border border-slate-200 space-y-4 shadow-sm">
+                    <div className="bg-white p-8 space-y-6 shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-700">Start Options</span>
-                        <div className="flex bg-slate-100 p-1 rounded-xl">
+                        <span className="font-black text-slate-900 uppercase tracking-widest text-sm">Start Options</span>
+                        <div className="flex bg-slate-100 p-1">
                           {['none', 'duration', 'time'].map((type) => (
                             <button
                               key={type}
@@ -745,31 +727,31 @@ function App() {
                                   setDelayConfig({ ...delayConfig, type: 'time', value: timeStr });
                                 }
                               }}
-                              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all capitalize ${delayConfig.type === type ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}
+                              className={`px-6 py-2 text-xs font-black transition-all uppercase tracking-widest ${delayConfig.type === type ? 'bg-white shadow-sm text-indigo-700' : 'text-slate-600'}`}
                             >
-                              {type === 'none' ? 'Immediately' : type === 'duration' ? 'In...' : 'At...'}
+                              {type === 'none' ? 'Now' : type === 'duration' ? 'In...' : 'At...'}
                             </button>
                           ))}
                         </div>
                       </div>
 
                       {delayConfig.type === 'duration' && (
-                        <div className="flex items-center gap-4 animate-in fade-in slide-in-from-top-1">
+                        <div className="flex items-center gap-6">
                           <input
                             type="range" min="1" max="60" value={delayConfig.value}
                             onChange={(e) => setDelayConfig({ ...delayConfig, value: parseInt(e.target.value) })}
-                            className="flex-1 h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                            className="flex-1 h-1.5 bg-slate-100 appearance-none cursor-pointer accent-indigo-600"
                           />
-                          <span className="font-mono font-bold text-indigo-600 w-16 text-right">{delayConfig.value}m</span>
+                          <span className="font-mono font-black text-2xl text-indigo-600 w-16 text-right">{delayConfig.value}m</span>
                         </div>
                       )}
 
                       {delayConfig.type === 'time' && (
-                        <div className="flex items-center gap-4 animate-in fade-in slide-in-from-top-1">
+                        <div className="flex items-center gap-4">
                           <input
                             type="time" value={delayConfig.value}
                             onChange={(e) => setDelayConfig({ ...delayConfig, value: e.target.value })}
-                            className="flex-1 p-2 bg-slate-50 rounded-xl border border-slate-100 font-mono font-bold text-indigo-600 text-center text-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                            className="flex-1 p-4 bg-slate-100 font-mono font-black text-indigo-700 text-center text-2xl focus:outline-none"
                           />
                         </div>
                       )}
@@ -779,9 +761,9 @@ function App() {
                   {mode === 'planning' && (
                     <button
                       onClick={startExecution}
-                      className="w-full py-6 bg-indigo-600 text-white rounded-2xl font-black text-xl shadow-xl shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-1 active:translate-y-0 transition-all flex items-center justify-center gap-3"
+                      className="w-full py-8 bg-indigo-600 text-white font-black text-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-4 uppercase tracking-[0.1em]"
                     >
-                      <Play size={24} fill="currentColor" />
+                      <Play size={28} fill="currentColor" />
                       START MY PLAN
                     </button>
                   )}
@@ -801,7 +783,7 @@ function App() {
                         onConfirm: () => setMode('planning')
                       });
                     }}
-                    className="px-6 py-2 text-slate-400 font-bold hover:text-rose-500 transition-colors flex items-center gap-2"
+                    className="px-6 py-2 text-slate-600 font-bold hover:text-rose-700 transition-colors flex items-center gap-2 uppercase tracking-widest text-xs"
                   >
                     <XCircle size={18} /> STOP SESSION
                   </button>
@@ -827,6 +809,8 @@ function App() {
 }
 
 function TaskRow({ task, index, onUpdate, onRemove, isActive, isExecuting, isPaused }) {
+  const dragControls = useDragControls();
+  
   const handleWheel = (e) => {
     if (isExecuting && !isPaused) return;
     if (e.currentTarget.contains(e.target)) {
@@ -840,67 +824,89 @@ function TaskRow({ task, index, onUpdate, onRemove, isActive, isExecuting, isPau
   const isEditable = !isExecuting || isPaused;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
+    <Reorder.Item
+      value={task}
+      dragListener={false}
+      dragControls={dragControls}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ 
         opacity: 1, 
-        x: 0,
-        borderColor: isActive ? '#4f46e5' : task.status === 'completed' ? '#10b981' : task.status === 'failed' ? '#f43f5e' : (task.type === 'break' ? '#fbbf24' : '#e2e8f0')
+        y: 0,
+        scale: isActive ? 1.02 : 1,
+        boxShadow: isActive 
+          ? "0 25px 60px rgba(79, 70, 229, 0.45)" 
+          : "0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.15)"
       }}
-      className={`group p-6 rounded-3xl border-2 transition-colors flex flex-col sm:flex-row items-center gap-6 ${
-        isActive ? 'bg-indigo-50/50 border-indigo-600 shadow-xl shadow-indigo-100 z-10' : 
-        task.type === 'break' ? 'bg-amber-50/20 border-amber-100' : 'bg-white border-slate-200 shadow-sm'
-      }`}
+      whileDrag={{ 
+        scale: 1.05, 
+        boxShadow: "0 30px 60px -12px rgba(0, 0, 0, 0.35)",
+        zIndex: 50
+      }}
+      className={`group py-8 px-6 flex flex-col sm:flex-row items-center gap-8 ${
+        isActive ? 'bg-indigo-600 text-white' : 
+        task.type === 'break' ? 'bg-amber-50/70' : 'bg-white'
+      } transition-colors cursor-default select-none`}
     >
-      <div className="flex-1 w-full flex items-center gap-4">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-          task.status === 'completed' ? 'bg-emerald-500 text-white' : 
-          task.status === 'failed' ? 'bg-rose-500 text-white' : 
-          isActive ? 'bg-indigo-600 text-white' : 
-          task.type === 'break' ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-400'
+      <div className="flex-1 w-full flex items-center gap-6">
+        {isEditable && (
+          <div 
+            onPointerDown={(e) => {
+              e.preventDefault(); // Prevents selection start
+              dragControls.start(e);
+            }}
+            className={`cursor-grab active:cursor-grabbing p-1 -ml-2 transition-colors touch-none ${isActive ? 'text-indigo-200 hover:text-white' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <GripVertical size={20} />
+          </div>
+        )}
+        <div className={`w-10 h-10 min-w-[2.5rem] flex items-center justify-center font-black text-lg ${
+          task.status === 'completed' ? 'bg-emerald-600 text-white' : 
+          task.status === 'failed' ? 'bg-rose-600 text-white' : 
+          isActive ? 'bg-white text-indigo-700' : 
+          task.type === 'break' ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700'
         }`}>
-          {task.status === 'completed' ? <CheckCircle2 size={16} /> : 
-           task.status === 'failed' ? <XCircle size={16} /> : 
-           task.type === 'break' ? <Coffee size={16} /> : index + 1}
+          {task.status === 'completed' ? <CheckCircle2 size={20} /> : 
+           task.status === 'failed' ? <XCircle size={20} /> : 
+           task.type === 'break' ? <Coffee size={20} /> : index + 1}
         </div>
         <div className="flex flex-col flex-1">
           <input
             type="text"
             value={task.name}
             disabled={!isEditable || task.type === 'break'}
+            onPointerDown={(e) => e.stopPropagation()} // Stop drag from triggering on input
             onChange={(e) => onUpdate({ name: e.target.value })}
-            placeholder={task.type === 'break' ? 'Short Break' : `Task #${index + 1}...`}
-            className={`w-full text-2xl font-bold focus:outline-none bg-transparent ${
+            placeholder={task.type === 'break' ? 'Short Break' : `Task Name...`}
+            className={`w-full text-2xl font-black focus:outline-none bg-transparent uppercase tracking-tight select-text ${
               !isEditable ? 'cursor-default' : ''
-            } ${task.status !== 'pending' && !isActive ? 'text-slate-400 line-through' : 'text-slate-700'}`}
+            } ${task.status !== 'pending' && !isActive ? 'text-slate-400 line-through' : isActive ? 'text-white' : 'text-slate-900'}`}
           />
-          {task.type === 'break' && <span className="text-[10px] uppercase font-black tracking-widest text-amber-500 ml-1">Break</span>}
+          {task.type === 'break' && <span className={`text-[10px] uppercase font-black tracking-[0.2em] mt-1 ${isActive ? 'text-indigo-200' : 'text-amber-600'}`}>Scheduled Break</span>}
         </div>
       </div>
 
-      <div className="flex items-center gap-6 w-full sm:w-auto">
+      <div className="flex items-center gap-4 sm:gap-8 w-full sm:w-auto">
         <div 
           onWheel={handleWheel}
-          className={`flex flex-col items-center gap-1 select-none ${!isEditable ? '' : 'cursor-ns-resize'}`}
-          title={!isEditable ? '' : 'Scroll to adjust time'}
+          className={`flex-1 sm:flex-initial flex flex-col items-center select-none ${!isEditable ? '' : 'cursor-ns-resize'}`}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <input
               type="number"
               disabled={!isEditable}
               value={task.duration}
               onChange={(e) => onUpdate({ duration: Math.min(60, Math.max(1, parseInt(e.target.value) || 1)) })}
               className={`w-16 text-center text-3xl font-black focus:outline-none tabular-nums bg-transparent ${
-                isActive ? (task.type === 'break' ? 'text-amber-600' : 'text-indigo-600') : 'text-slate-400'
+                isActive ? 'text-white' : 'text-slate-600'
               }`}
             />
-            <span className="text-slate-400 font-black text-sm uppercase">min</span>
+            <span className={`font-black text-xs uppercase tracking-widest ${isActive ? 'text-indigo-200' : 'text-slate-500'}`}>min</span>
           </div>
           {isEditable && (
             <input
               type="range" min="1" max="60" value={task.duration}
               onChange={(e) => onUpdate({ duration: parseInt(e.target.value) })}
-              className={`w-32 h-2 rounded-lg appearance-none cursor-pointer ${task.type === 'break' ? 'bg-amber-100 accent-amber-500' : 'bg-slate-100 accent-indigo-500'}`}
+              className={`w-full sm:w-32 h-1.5 appearance-none cursor-pointer mt-2 ${isActive ? 'bg-indigo-400 accent-white' : 'bg-slate-300 accent-indigo-700'}`}
             />
           )}
         </div>
@@ -908,13 +914,13 @@ function TaskRow({ task, index, onUpdate, onRemove, isActive, isExecuting, isPau
         {isEditable && (
           <button
             onClick={onRemove}
-            className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-2xl transition-all sm:opacity-0 group-hover:opacity-100"
+            className={`p-3 transition-all sm:opacity-0 group-hover:opacity-100 flex-shrink-0 ${isActive ? 'text-indigo-200 hover:text-white' : 'text-slate-400 hover:text-rose-700 hover:bg-rose-50'}`}
           >
-            <Trash2 size={20} />
+            <Trash2 size={24} />
           </button>
         )}
       </div>
-    </motion.div>
+    </Reorder.Item>
   );
 }
 
