@@ -446,7 +446,7 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-roboto transition-colors duration-500 pb-20">
       {/* Header */}
-      <header className="bg-white border-b border-slate-300 sticky top-0 z-30 shadow-sm">
+      <header className="bg-white border-b border-slate-300 shadow-sm">
         <div className="max-w-[1400px] mx-auto px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-4">
           <a href="/" className="flex items-center gap-4 hover:opacity-90 transition-opacity group">
             <div className="w-18 h-18 p-2 bg-indigo-600 flex items-center justify-center text-white shadow-xl shadow-indigo-100 group-hover:scale-105 transition-transform">
@@ -458,10 +458,10 @@ function App() {
             </div>
           </a>
 
-          <div className="flex flex-col sm:flex-row items-center gap-8 md:gap-16 w-full md:w-auto">
-            <div className="flex items-center gap-8 md:gap-12 justify-center md:justify-end w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-12 w-full md:w-auto ">
+            <div className="flex items-center gap-4 md:gap-8 justify-center md:justify-end w-full md:w-auto">
               <div className="flex items-center gap-3">
-                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Total Plan</span>
+                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Total Time</span>
                 <span className="text-4xl font-mono font-black text-teal-600">{Math.floor(totalPlanTime / 60)}<span className="text-base ml-0.5">m</span></span>
               </div>
               {(mode === 'executing' || mode === 'waiting') && (
@@ -478,14 +478,14 @@ function App() {
               )}
             </div>
 
-            <div className="text-center md:text-right border-t-2 md:border-t-0 md:border-l-2 border-slate-200 pt-6 md:pt-0 md:pl-12 w-full md:w-auto">
+            {/* <div className="text-center md:text-right border-t-2 md:border-t-0 md:border-l-2 border-slate-200 pt-6 md:pt-0 md:pl-12 w-full md:w-auto">
               <p className="text-4xl font-mono font-black text-slate-900 tracking-tighter">
                 {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
               </p>
               <p className="text-xs text-slate-600 font-black uppercase tracking-widest mt-1">
                 {currentTime.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -885,7 +885,7 @@ function TaskRow({ task, index, onUpdate, onRemove, isActive, isExecuting, isPau
         </div>
       </div>
 
-      <div className="flex items-center gap-4 sm:gap-8 w-full sm:w-auto">
+      <div className="flex items-center gap-4 sm:gap-16 w-full sm:w-auto">
         <div 
           onWheel={handleWheel}
           className={`flex-1 sm:flex-initial flex flex-col items-center select-none ${!isEditable ? '' : 'cursor-ns-resize'}`}
@@ -906,7 +906,7 @@ function TaskRow({ task, index, onUpdate, onRemove, isActive, isExecuting, isPau
             <input
               type="range" min="1" max="60" value={task.duration}
               onChange={(e) => onUpdate({ duration: parseInt(e.target.value) })}
-              className={`w-full sm:w-32 h-1.5 appearance-none cursor-pointer mt-2 ${isActive ? 'bg-indigo-400 accent-white' : 'bg-slate-300 accent-indigo-700'}`}
+              className={`w-full sm:w-[150%] h-1.5 appearance-none cursor-pointer mt-2 ${isActive ? 'bg-indigo-400 accent-white' : 'bg-slate-300 accent-indigo-700'}`}
             />
           )}
         </div>
