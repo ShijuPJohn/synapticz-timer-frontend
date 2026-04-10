@@ -467,11 +467,11 @@ function App() {
               {(mode === 'executing' || mode === 'waiting') && (
                 <>
                   <div className="flex items-center gap-3 border-l-2 border-slate-200 pl-8 md:pl-12">
-                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest text-indigo-600">Elapsed</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">Elapsed</span>
                     <span className="text-3xl font-mono font-black text-indigo-700">{formatTime(elapsedPlanTime)}</span>
                   </div>
                   <div className="flex items-center gap-3 border-l-2 border-slate-200 pl-8 md:pl-12">
-                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest text-rose-600">Remaining</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-rose-600">Remaining</span>
                     <span className="text-3xl font-mono font-black text-rose-700">{formatTime(remainingPlanTime)}</span>
                   </div>
                 </>
@@ -877,7 +877,7 @@ function TaskRow({ task, index, onUpdate, onRemove, isActive, isExecuting, isPau
             onPointerDown={(e) => e.stopPropagation()} // Stop drag from triggering on input
             onChange={(e) => onUpdate({ name: e.target.value })}
             placeholder={task.type === 'break' ? 'Short Break' : `Task Name...`}
-            className={`w-full text-2xl font-black focus:outline-none bg-transparent uppercase tracking-tight select-text ${
+            className={`w-full text-3xl font-[400] text-teal-800 focus:outline-none bg-transparent tracking-tight select-text ${
               !isEditable ? 'cursor-default' : ''
             } ${task.status !== 'pending' && !isActive ? 'text-slate-400 line-through' : isActive ? 'text-white' : 'text-slate-900'}`}
           />
