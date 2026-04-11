@@ -5,25 +5,9 @@ import confetti from 'canvas-confetti';
 import { motivatingLines } from './motivatingLines';
 
 const STORAGE_KEY = 'synapticz_tasks';
+const LEISURE_KEY = 'synapticz_leisure_time';
 
-// Audio Utility
-const playSound = (type) => {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  
-  if (type === 'tick') {
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(1200, ctx.currentTime);
-    gain.gain.setValueAtTime(0.1, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.05);
-  }
-};
+// ... (playSound remains same)
 
 function Modal({ isOpen, onClose, title, message, onConfirm, type = 'alert', confirmText = 'OK', subMessage }) {
   if (!isOpen) return null;
@@ -138,8 +122,7 @@ function App() {
   const [tasks, setTasks] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) return JSON.parse(saved);
-    
-    // Default: Interspersed tasks and breaks
+    // ... (Default tasks logic)
     const initial = [];
     for (let i = 0; i < 3; i++) {
       initial.push({
@@ -162,6 +145,11 @@ function App() {
       });
     }
     return initial;
+  });
+
+  const [leisureTime, setLeisureTime] = useState(() => {
+    const saved = localStorage.getItem(LEISURE_KEY);
+    return saved ? parseInt(saved) : 0;
   });
 
   const [mode, setMode] = useState('planning'); // 'planning' | 'waiting' | 'executing' | 'summary'
@@ -236,8 +224,6 @@ function App() {
       const currentTask = tasks[activeIndex];
       timer = setInterval(() => {
         setTimeLeft((prev) => {
-          if (prev <= 0) return 0;
-          
           const nextVal = prev - 1;
           
           // Break Sound Logic
@@ -346,6 +332,7 @@ function App() {
       const newTasks = [...tasks];
       newTasks[activeIndex].status = status;
       newTasks[activeIndex].endTime = now;
+      newTasks[activeIndex].timeLeftAtCompletion = timeLeft;
       setIsPaused(false);
 
       if (activeIndex + 1 < tasks.length) {
@@ -358,6 +345,12 @@ function App() {
         }, isCompleted ? 400 : 0); // Brief pause to see feedback
       } else {
         setTasks(newTasks);
+        const totalSavedSeconds = newTasks.reduce((acc, t) => acc + (t.timeLeftAtCompletion || 0), 0);
+        if (totalSavedSeconds > 0) {
+          const newLeisureTime = leisureTime + totalSavedSeconds;
+          setLeisureTime(newLeisureTime);
+          localStorage.setItem(LEISURE_KEY, newLeisureTime.toString());
+        }
         setTimeout(() => {
           setMode('summary');
         }, 600);
@@ -365,6 +358,7 @@ function App() {
     };
 
     if (isTask && isCompleted) {
+      setIsPaused(true); // Pause timer while modal is shown
       if (isEarly) {
         triggerConfetti(true);
         const randomLine = motivatingLines[Math.floor(Math.random() * motivatingLines.length)];
@@ -374,7 +368,8 @@ function App() {
           subMessage: `You crushed it with ${Math.floor(timeLeft / 60)}m ${timeLeft % 60}s to spare!`,
           type: 'success',
           confirmText: 'KEEP THE FLOW',
-          onConfirm: proceed
+          onConfirm: proceed,
+          onClose: () => setIsPaused(false) // Resume if cancelled
         });
       } else {
         showModal({
@@ -382,7 +377,8 @@ function App() {
           message: "Well done! You've completed your task. Ready for the next one?",
           type: 'success',
           confirmText: 'CONTINUE',
-          onConfirm: proceed
+          onConfirm: proceed,
+          onClose: () => setIsPaused(false) // Resume if cancelled
         });
       }
     } else {
@@ -431,9 +427,11 @@ function App() {
   };
 
   const formatTime = (seconds) => {
-    const m = Math.floor(Math.abs(seconds) / 60);
-    const s = Math.abs(seconds) % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    const sign = seconds < 0 ? '-' : '';
+    const absSeconds = Math.abs(seconds);
+    const m = Math.floor(absSeconds / 60);
+    const s = absSeconds % 60;
+    return `${sign}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
   const totalPlanTime = tasks.reduce((acc, t) => acc + t.duration * 60, 0);
@@ -476,6 +474,34 @@ function App() {
                   </div>
                 </>
               )}
+              <div className="flex items-center gap-3 border-l-2 border-slate-200 pl-8 md:pl-12 group">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Leisure Earned</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-3xl font-mono font-black text-emerald-700">{Math.floor(leisureTime / 60)}<span className="text-sm ml-0.5">m</span></span>
+                    {leisureTime > 0 && (
+                      <button 
+                        onClick={() => {
+                          showModal({
+                            title: 'Reset Leisure Time?',
+                            message: 'Are you sure you want to reset your earned leisure time to zero?',
+                            type: 'confirm',
+                            confirmText: 'RESET',
+                            onConfirm: () => {
+                              setLeisureTime(0);
+                              localStorage.setItem(LEISURE_KEY, '0');
+                            }
+                          });
+                        }}
+                        className="p-1 text-slate-400 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Reset Leisure Time"
+                      >
+                        <RotateCcw size={14} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* <div className="text-center md:text-right border-t-2 md:border-t-0 md:border-l-2 border-slate-200 pt-6 md:pt-0 md:pl-12 w-full md:w-auto">
@@ -516,26 +542,91 @@ function App() {
                 <h2 className="text-4xl font-black text-slate-900 mb-2 uppercase tracking-tight">Plan Complete!</h2>
                 <p className="text-slate-700 font-medium mb-12">Here's how you did on your focus session.</p>
 
-                <div className="space-y-2 text-left mb-12">
-                  {tasks.map(task => (
-                    <div key={task.id} className="flex items-center justify-between p-6 bg-slate-100">
-                      <div className="flex items-center gap-4">
-                        {task.status === 'completed' ? (
-                          <CheckCircle2 className="text-emerald-600" size={24} />
-                        ) : task.status === 'failed' ? (
-                          <XCircle className="text-rose-600" size={24} />
-                        ) : (
-                          <Clock className="text-slate-500" size={24} />
-                        )}
-                        <div className="flex flex-col">
-                          <span className="font-bold text-slate-800 text-lg">{task.name || (task.type === 'break' ? 'Short Break' : 'Untitled Task')}</span>
-                          <span className="text-[10px] uppercase font-black tracking-widest text-slate-600">{task.type}</span>
+                <div className="space-y-4 text-left mb-12">
+                  <div className="grid grid-cols-12 px-6 text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">
+                    <div className="col-span-6">Task</div>
+                    <div className="col-span-2 text-right">Planned</div>
+                    <div className="col-span-2 text-right">Actual</div>
+                    <div className="col-span-2 text-right">Saved</div>
+                  </div>
+                  {tasks.map(task => {
+                    const actualSeconds = (task.duration * 60) - (task.timeLeftAtCompletion || 0);
+                    const timeSavedSeconds = task.timeLeftAtCompletion || 0;
+                    
+                    return (
+                      <div key={task.id} className="grid grid-cols-12 items-center p-6 bg-slate-100">
+                        <div className="col-span-6 flex items-center gap-4">
+                          {task.status === 'completed' ? (
+                            <CheckCircle2 className="text-emerald-600 flex-shrink-0" size={24} />
+                          ) : task.status === 'failed' ? (
+                            <XCircle className="text-rose-600 flex-shrink-0" size={24} />
+                          ) : (
+                            <Clock className="text-slate-500 flex-shrink-0" size={24} />
+                          )}
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-bold text-slate-800 text-lg truncate">{task.name || (task.type === 'break' ? 'Short Break' : 'Untitled Task')}</span>
+                            <span className="text-[10px] uppercase font-black tracking-widest text-slate-600">{task.type}</span>
+                          </div>
+                        </div>
+                        <div className="col-span-2 text-right font-black text-slate-600">{task.duration}m</div>
+                        <div className="col-span-2 text-right font-black text-slate-900">{formatTime(actualSeconds)}</div>
+                        <div className={`col-span-2 text-right font-black ${timeSavedSeconds > 0 ? 'text-emerald-600' : timeSavedSeconds < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                          {formatTime(timeSavedSeconds)}
                         </div>
                       </div>
-                      <span className="text-slate-600 font-black">{task.duration}m</span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
+
+                {(() => {
+                  const totalSavedSeconds = tasks.reduce((acc, t) => acc + (t.timeLeftAtCompletion || 0), 0);
+                  const isPositive = totalSavedSeconds > 0;
+                  const absMinutes = Math.floor(Math.abs(totalSavedSeconds) / 60);
+                  const absSeconds = Math.abs(totalSavedSeconds) % 60;
+                  const timeStr = `${absMinutes} ${absMinutes === 1 ? 'minute' : 'minutes'}${absSeconds > 0 ? ` ${absSeconds}s` : ''}`;
+
+                  return (
+                    <div className={`mb-12 p-8 ${isPositive ? 'bg-emerald-50 border-2 border-emerald-100' : 'bg-slate-100 border-2 border-slate-200'}`}>
+                      <p className={`text-2xl font-black uppercase tracking-tight ${isPositive ? 'text-emerald-800' : 'text-slate-800'}`}>
+                        {isPositive 
+                          ? `You beat the clock by ${timeStr}. Way to go!`
+                          : totalSavedSeconds < 0 
+                            ? `You were over the clock by ${timeStr}. Keep pushing!`
+                            : `You finished exactly on time! Great pacing!`}
+                      </p>
+                      {isPositive && (
+                        <p className="mt-4 text-emerald-600 font-bold uppercase tracking-widest animate-bounce">
+                          You've earned {timeStr} of leisure time!
+                        </p>
+                      )}
+                      <div className="mt-8 pt-8 border-t border-slate-200 flex flex-col items-center gap-4">
+                        <div className="flex flex-col items-center">
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Cumulative Leisure Pool</span>
+                          <span className="text-4xl font-mono font-black text-emerald-700">{Math.floor(leisureTime / 60)}m {leisureTime % 60}s</span>
+                        </div>
+                        {leisureTime > 0 && (
+                          <button
+                            onClick={() => {
+                              showModal({
+                                title: 'Reset Leisure Pool?',
+                                message: 'This will clear your accumulated leisure time. Ready to start fresh?',
+                                type: 'confirm',
+                                confirmText: 'RESET POOL',
+                                onConfirm: () => {
+                                  setLeisureTime(0);
+                                  localStorage.setItem(LEISURE_KEY, '0');
+                                }
+                              });
+                            }}
+                            className="px-4 py-2 text-xs font-black text-rose-600 hover:bg-rose-50 transition-colors uppercase tracking-widest border border-rose-100"
+                          >
+                            Reset Leisure Pool
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 <button
                   onClick={() => setMode('planning')}
@@ -877,7 +968,7 @@ function TaskRow({ task, index, onUpdate, onRemove, isActive, isExecuting, isPau
             onPointerDown={(e) => e.stopPropagation()} // Stop drag from triggering on input
             onChange={(e) => onUpdate({ name: e.target.value })}
             placeholder={task.type === 'break' ? 'Short Break' : `Task Name...`}
-            className={`w-full text-3xl font-[400] text-teal-800 focus:outline-none bg-transparent tracking-tight select-text ${
+            className={`w-full text-3xl font-[400] text-gray-600 focus:outline-none bg-transparent tracking-tight select-text ${
               !isEditable ? 'cursor-default' : ''
             } ${task.status !== 'pending' && !isActive ? 'text-slate-400 line-through' : isActive ? 'text-white' : 'text-slate-900'}`}
           />
