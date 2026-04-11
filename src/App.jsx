@@ -7,7 +7,24 @@ import { motivatingLines } from './motivatingLines';
 const STORAGE_KEY = 'synapticz_tasks';
 const LEISURE_KEY = 'synapticz_leisure_time';
 
-// ... (playSound remains same)
+// Audio Utility
+const playSound = (type) => {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  
+  if (type === 'tick') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, ctx.currentTime);
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.05);
+  }
+};
 
 function Modal({ isOpen, onClose, title, message, onConfirm, type = 'alert', confirmText = 'OK', subMessage }) {
   if (!isOpen) return null;
